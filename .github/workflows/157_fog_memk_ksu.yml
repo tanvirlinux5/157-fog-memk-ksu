@@ -115,5 +115,3 @@ jobs:
             out/arch/arm64/boot/Image.gz
             out/drivers/memkernel/fog_snipex_memk.ko
            
-
-.
