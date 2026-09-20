@@ -23,7 +23,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc bison build-essential ccache curl flex \
             git libelf-dev libncurses5-dev libssl-dev lzop make \
-            rsync squashfs-tools xsltproc zip zlib1g-dev libtinfo5
+            python2 python2.7 rsync squashfs-tools xsltproc zip \
+            zlib1g-dev libtinfo5
 
       - name: Download Toolchains
         run: |
@@ -62,7 +63,6 @@ jobs:
           scripts/config --disable MODULE_SIG_FORCE
           scripts/config --disable MODULE_SIG_ALL
           scripts/config --disable MODULE_SIG_SHA512
-
           make O=out ARCH=arm64 olddefconfig
           
 
