@@ -12,8 +12,8 @@ jobs:
       - name: Checkout Kernel Source
         uses: actions/checkout@v4
         with:
-          submodules: recursive
           fetch-depth: 1
+          submodules: recursive
           
 
       - name: Set up MemKernel as a module (M-OUT) with specified name
