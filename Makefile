@@ -403,7 +403,7 @@ INSTALLKERNEL  := installkernel
 DEPMOD		= /sbin/depmod
 PERL		= perl
 PYTHON		= python
-PYTHON2		= python2
+PYTHON2 = python3
 PYTHON3		= python3
 CHECK		= sparse
 
