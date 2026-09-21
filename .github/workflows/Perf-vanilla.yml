@@ -1,0 +1,65 @@
+name: 157_fog_snipex_perf-vanilla
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build 157_fog_snipex_perf-vanilla
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Kernel Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison build-essential ccache curl flex \
+            git libelf-dev libncurses5-dev libssl-dev lzop make \
+            python2 python2.7 rsync squashfs-tools xsltproc zip \
+            zlib1g-dev libtinfo5
+
+      - name: Download Toolchains
+        run: |
+          mkdir -p clang gcc64 gcc32
+
+          curl -LO https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/tags/android-13.0.0_r82/clang-r450784d.tar.gz
+          tar -xf clang-r450784d.tar.gz -C clang
+          rm clang-r450784d.tar.gz
+
+          curl -LO https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-11.0.0_r35.tar.gz
+          tar -xf android-11.0.0_r35.tar.gz -C gcc64
+          rm android-11.0.0_r35.tar.gz
+
+          curl -LO https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-11.0.0_r35.tar.gz
+          tar -xf android-11.0.0_r35.tar.gz -C gcc32
+          rm android-11.0.0_r35.tar.gz
+
+      - name: Build Kernel
+        run: |
+          export PATH="$GITHUB_WORKSPACE/clang/bin:$GITHUB_WORKSPACE/gcc64/bin:$GITHUB_WORKSPACE/gcc32/bin:$PATH"
+          export ARCH=arm64
+          export SUBARCH=arm64
+
+          make O=out ARCH=arm64 CC=clang \
+            CLANG_TRIPLE=aarch64-linux-gnu- \
+            CROSS_COMPILE=aarch64-linux-android- \
+            CROSS_COMPILE_ARM32=arm-linux-androideabi- \
+            vendor/fog-perf_defconfig
+
+          make -j$(nproc) O=out \
+            ARCH=arm64 CC=clang \
+            CLANG_TRIPLE=aarch64-linux-gnu- \
+            CROSS_COMPILE=aarch64-linux-android- \
+            CROSS_COMPILE_ARM32=arm-linux-androideabi- \
+            Image.gz
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: 4.19.157_fog_snipex_perf-vanilla
+          path: |
+            out/arch/arm64/boot/Image.gz
